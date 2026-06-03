@@ -16,30 +16,14 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Disable code signing
+      - name: Build iOS (flutter)
         run: |
-          cd ios
-          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.example.kancolleapp;/' Runner.xcodeproj/project.pbxproj
-          plutil -replace CFBundleIdentifier -string "com.example.kancolleapp" Runner/Info.plist
-
-      - name: Build iOS (xcodebuild)
-        run: |
-          cd ios
-          xcodebuild \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -sdk iphoneos \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            DEVELOPMENT_TEAM="" \
-            -derivedDataPath build
+          flutter build ios --release --no-codesign
 
       - name: Package IPA
         run: |
           mkdir -p Payload
-          cp -r ios/build/Build/Products/Release-iphoneos/Runner.app Payload/
+          cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r app.ipa Payload
 
       - uses: actions/upload-artifact@v4
